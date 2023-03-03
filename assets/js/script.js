@@ -3,6 +3,7 @@ var cityNameSearch = $('#city-name-search');
 var historyContainerEl = $('#search-history');
 var historyContainerListEl = $('<ul>');
 var savedCities = new Array();
+var timeNow = dayjs().format("DD/MM/YYYY");
 // var btnStyle = $('<button type="button" class="btn btn-secondary m-1"></button>');
 
 $(function() {
@@ -19,41 +20,50 @@ function addCityToLocalStorage(city) {
     savedCities.unshift(city);
     localStorage.setItem("cities", JSON.stringify(savedCities));
     var btnEl = $('<button type="button" class="btn btn-secondary m-1"></button>');
-    btnEl.text(city);
+    btnEl.attr("data-city", city).text(city);
     historyContainerEl.prepend(btnEl);
 };
 
 function renderCityHistoryList() {
     for(var i=0; i<savedCities.length; i++){
-        var usedCityName = savedCities[i];
+        var city = savedCities[i];
         var btnEl = $('<button type="button" class="btn btn-secondary m-1"></button>');
+        btnEl.attr("data-city", city).text(city);
         historyContainerEl.append(btnEl);
-        btnEl.text(usedCityName);
     };
 
 };
 
 function showWeather(city) {
-    var currentWeatherURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&units=metric&appid=' + APIKey;
-    var forecastURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + city + '&units=metric&appid=' + APIKey;
+    var currentWeatherURL = 
+        'https://api.openweathermap.org/data/2.5/weather?q=' 
+        + city + '&units=metric&appid=' + APIKey;
+    var forecastURL = 
+        'http://api.openweathermap.org/data/2.5/forecast?q=' 
+        + city + '&units=metric&appid=' + APIKey;
+
     fetch(currentWeatherURL).then(function(response) {
         if(response.ok) {
             response.json().then(function (data) {
                 console.log(response);
                 console.log(data);
-                var todayCityName = $('#today-city-name');
-                var todayTemp = $('#today-temp');
-                var todayWind = $('#today-wind');
-                var todayHum = $('#today-hum');
-                var icon = $('<img src="http://openweathermap.org/img/wn/' + data.weather[0].icon + '.png">')
-        
-                todayCityName.text(data.name + dayjs().format(" (DD/MM/YYYY)"));
-                todayCityName.append(icon);
-                todayTemp.text(data.main.temp + " ℃");
-                todayWind.text(data.wind.speed + " mph");
-                todayHum.text(data.main.humidity + " %");
-
                 addCityToLocalStorage(city);
+                var icon = $('<img src="http://openweathermap.org/img/wn/' + data.weather[0].icon + '.png">')
+
+                $('#today-city-name').text(data.name + " (" + timeNow + ")").append(icon);
+                $('#today-temp').text(data.main.temp + " ℃");
+                $('#today-wind').text(data.wind.speed + " mph");
+                $('#today-hum').text(data.main.humidity + " %");
+
+                fetch(forecastURL).then(function(response) {
+                    response.json().then(function(data) {
+                        console.log('---------------------');
+                        console.log(data);
+                        console.log(data.list[0].dt_txt);
+                        // this is how to get date and hour from index i in for loop, think how to prepare the last one
+                    });
+                });
+
             });
         } else {
             alert('City does not exist.')
@@ -72,7 +82,8 @@ function handleCitySearch(event) {
 };
 cityNameSearch.on('submit', handleCitySearch);
 
-// do not add wrong cities to the menu
+// 
 // buttons to work on the weather somehow
+// data atr set data-city to store city names in button element, i think i can use it for later
 
 // 5day forecast
