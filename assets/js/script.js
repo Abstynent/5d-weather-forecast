@@ -59,17 +59,22 @@ function showWeather(city) {
                     response.json().then(function(data) {
                         console.log('---------------------');
                         console.log(data);
-                        console.log(data.list[0].dt_txt);
+                        console.log(data.list[4].dt_txt.split(' ')[1].split(':')[0]);
+                        console.log(typeof parseInt(data.list[4].dt_txt.split(' ')[1].split(':')[0]));
+                        clearForecastEl();
                         console.log(dayjs().add(1,'day'));
-                        for(var i=0; i<5; i++) {
-                            var cardEl = $('<div class="p-2 m-2 flex-fill" style="background-color: gray">');
-                            var date = $('<p>').text(timeNow);
-                            var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
-                            var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
-                            var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
-                            var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
-                            $('#forecast').append(cardEl);
-                            cardEl.append(date).append(icon).append(temp).append(wind).append(hum);              
+                        for(var i=0; i<40; i++) {
+                            if(parseInt(data.list[i].dt_txt.split(' ')[1].split(':')[0]) === 12) {
+                                var cardEl = $('<div class="bg-secondary p-2 m-2 flex-fill">');
+                                var date = $('<p>').text(data.list[i].dt_txt.split(' ')[0]);
+                                var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
+                                var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
+                                var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
+                                var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
+                                $('#forecast').append(cardEl);
+                                cardEl.append(date).append(icon).append(temp).append(wind).append(hum); 
+                            };
+                                        
                         };
                     });
                 });
@@ -89,6 +94,10 @@ function handleCitySearch(event) {
     showWeather(city);
     cityNameSearch[0].reset(); // clear the value
 
+};
+function clearForecastEl() {
+    const parent = $('#forecast');
+    parent.empty();
 };
 cityNameSearch.on('submit', handleCitySearch);
 
