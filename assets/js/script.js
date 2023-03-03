@@ -34,11 +34,10 @@ function renderCityHistoryList() {
 };
 
 function showWeather(city) {
-    var requestUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&units=metric&appid=' + APIKey;
-
-    fetch(requestUrl).then(function(response) {
-        console.log(response);
-        if(response.status == 200) {
+    var currentWeatherURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&units=metric&appid=' + APIKey;
+    var forecastURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + city + '&units=metric&appid=' + APIKey;
+    fetch(currentWeatherURL).then(function(response) {
+        if(response.ok) {
             response.json().then(function (data) {
                 console.log(response);
                 console.log(data);
@@ -53,38 +52,27 @@ function showWeather(city) {
                 todayTemp.text(data.main.temp + " ℃");
                 todayWind.text(data.wind.speed + " mph");
                 todayHum.text(data.main.humidity + " %");
+
+                addCityToLocalStorage(city);
             });
-        };
+        } else {
+            alert('City does not exist.')
+        }
     });
 };
 
 
-// fetch(apiUrl)
-// .then(function (response) {
-//   if (response.ok) {
-//     console.log(response);
-//     response.json().then(function (data) {
-//       console.log(data);
-//       displayRepos(data, user);
-//     });
-//   } else {
-//     alert('Error: ' + response.statusText);
-//   }
-// })
-// .catch(function (error) {
-//   alert('Unable to connect to GitHub');
-// });
-// };
-
 
 function handleCitySearch(event) {
     event.preventDefault();
-    cityInput = $('input[name="city"').val();
-    addCityToLocalStorage(cityInput);
-    showWeather(cityInput);
+    city = $('input[name="city"').val();
+    showWeather(city);
     cityNameSearch[0].reset(); // clear the value
 
 };
 cityNameSearch.on('submit', handleCitySearch);
 
-// check if the city is already in the array
+// do not add wrong cities to the menu
+// buttons to work on the weather somehow
+
+// 5day forecast
