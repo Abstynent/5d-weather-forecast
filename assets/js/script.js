@@ -60,7 +60,17 @@ function showWeather(city) {
                         console.log('---------------------');
                         console.log(data);
                         console.log(data.list[0].dt_txt);
-                        // this is how to get date and hour from index i in for loop, think how to prepare the last one
+                        console.log(dayjs().add(1,'day'));
+                        for(var i=0; i<5; i++) {
+                            var cardEl = $('<div class="p-2 m-2 flex-fill" style="background-color: gray">');
+                            var date = $('<p>').text(timeNow);
+                            var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
+                            var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
+                            var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
+                            var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
+                            $('#forecast').append(cardEl);
+                            cardEl.append(date).append(icon).append(temp).append(wind).append(hum);              
+                        };
                     });
                 });
 
