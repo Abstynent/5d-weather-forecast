@@ -11,6 +11,7 @@ $(function() {
 
 // fetch data from localstorage and populate list of search history
 function renderCityHistoryList() {
+    historyContainerEl.empty();
     for(var i=0; i<savedCities.length; i++){
         var city = savedCities[i];
         var btnEl = $('<button type="button" data-city="' + city + '" class="btn btn-secondary m-1"></button>');
@@ -48,31 +49,12 @@ function showWeather(city) {
         if(response.ok) { // if city exists (== connection success)
             response.json().then(function (data) {
                 addCityToLocalStorage(city);
-                console.log(data);
-                var icon = $('<img src="http://openweathermap.org/img/wn/' + data.weather[0].icon + '.png">')
-
-                $('#today-city-name').text(data.name + " (" + dayjs().format("DD/MM/YYYY") + ")").append(icon);
-                $('#today-temp').text(data.main.temp + " ℃");
-                $('#today-wind').text(data.wind.speed + " mph");
-                $('#today-hum').text(data.main.humidity + " %");
-
+                renderCurrentWeather(data);
                 clearForecastEl(); // clear div
 
                 fetch(forecastURL).then(function(response) {
                     response.json().then(function(data) {
-                        for(var i=0; i<40; i++) {
-                            if(parseInt(data.list[i].dt_txt.split(' ')[1].split(':')[0]) === 12) {
-                                var cardEl = $('<div class="bg-secondary p-2 m-2 flex-fill">');
-                                var date = $('<p>').text(data.list[i].dt_txt.split(' ')[0]);
-                                var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
-                                var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
-                                var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
-                                var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
-
-                                $('#forecast').append(cardEl);
-                                cardEl.append(date).append(icon).append(temp).append(wind).append(hum); 
-                            };         
-                        };
+                        renderForecast(data);
                     });
                 });
             });
@@ -80,6 +62,33 @@ function showWeather(city) {
             alert('City does not exist.')
         };
     });
+};
+
+function renderCurrentWeather(data) {
+    var icon = $('<img src="http://openweathermap.org/img/wn/' + data.weather[0].icon + '.png">')
+
+    $('#today-city-name').text(data.name + " (" + dayjs().format("YYYY-MM-DD") + ")").append(icon);
+    $('#today-temp').text(data.main.temp + " ℃");
+    $('#today-wind').text(data.wind.speed + " mph");
+    $('#today-hum').text(data.main.humidity + " %");
+};
+// if user is checking it before 12am it will display forecast for today as well
+function renderForecast(data) {
+    for(var i=0; i<40; i++) {
+        if(parseInt(data.list[i].dt_txt.split(' ')[1].split(':')[0]) === 12) {
+            // console.log(data);
+            // console.log(data.list[i].dt_txt.split(' ')[1]);
+            var cardEl = $('<div class="bg-secondary p-2 m-2 flex-fill">');
+            var date = $('<p>').text(data.list[i].dt_txt.split(' ')[0]);
+            var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
+            var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
+            var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
+            var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
+
+            $('#forecast').append(cardEl);
+            cardEl.append(date).append(icon).append(temp).append(wind).append(hum); 
+        };         
+    };
 };
 
 // clear forecast section
@@ -93,7 +102,11 @@ cityNameSearch.on('submit', handleCitySearch);
 
 historyContainerEl.click(function(event) {
     var temp = $(event.target);
-    showWeather(temp.data('city'));
+    let city = temp.data('city');
+    savedCities.unshift(savedCities.splice(savedCities.indexOf(city),1)[0]); // ?
+    localStorage.setItem("cities", JSON.stringify(savedCities));
+    renderCityHistoryList();
+    showWeather(city);
 });
 
 function handleCitySearch(event) {
