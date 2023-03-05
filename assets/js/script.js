@@ -39,7 +39,7 @@ function showWeather(city) {
     var currentWeatherURL = 
         'https://api.openweathermap.org/data/2.5/weather?q=' 
         + city + '&units=metric&appid=' + APIKey;
-    
+
     // Connect to 5 days every 3 hours API
     var forecastURL = 
         'http://api.openweathermap.org/data/2.5/forecast?q=' 
@@ -54,7 +54,12 @@ function showWeather(city) {
 
                 fetch(forecastURL).then(function(response) {
                     response.json().then(function(data) {
-                        renderForecast(data);
+                        for(var i=0; i<40; i++) {
+                            if(parseInt(data.list[i].dt_txt.split(' ')[1].split(':')[0]) === 12 && data.list[i].dt_txt.split(' ')[0] !== dayjs().format("YYYY-MM-DD") ) {
+                                renderForecast(data,i);
+                            };         
+                        };
+                        if($('#forecast').children().length !== 5) renderForecast(data,39); // if api request is sent before 12pm there will be not enough data to get weather at 12pm on 5th day
                     });
                 });
             });
@@ -66,29 +71,22 @@ function showWeather(city) {
 
 function renderCurrentWeather(data) {
     var icon = $('<img src="http://openweathermap.org/img/wn/' + data.weather[0].icon + '.png">')
-
     $('#today-city-name').text(data.name + " (" + dayjs().format("YYYY-MM-DD") + ")").append(icon);
     $('#today-temp').text(data.main.temp + " ℃");
     $('#today-wind').text(data.wind.speed + " mph");
     $('#today-hum').text(data.main.humidity + " %");
 };
-// if user is checking it before 12am it will display forecast for today as well
-function renderForecast(data) {
-    for(var i=0; i<40; i++) {
-        if(parseInt(data.list[i].dt_txt.split(' ')[1].split(':')[0]) === 12) {
-            // console.log(data);
-            // console.log(data.list[i].dt_txt.split(' ')[1]);
-            var cardEl = $('<div class="bg-secondary p-2 m-2 flex-fill">');
-            var date = $('<p>').text(data.list[i].dt_txt.split(' ')[0]);
-            var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
-            var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
-            var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
-            var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
+// add card elements to the page
+function renderForecast(data,i) {
+    var cardEl = $('<div class="bg-secondary p-2 m-2 flex-fill">');
+    var date = $('<p>').text(data.list[i].dt_txt.split(' ')[0]);
+    var icon = $('<p>').append('<img src="http://openweathermap.org/img/wn/' + data.list[i].weather[0].icon + '.png">');
+    var temp = $('<p>').text('Temp: ' + data.list[i].main.temp + " ℃");
+    var wind = $('<p>').text('Wind: ' + data.list[i].wind.speed + ' mph');
+    var hum = $('<p>').text('Humidity: ' + data.list[i].main.humidity + " %");
 
-            $('#forecast').append(cardEl);
-            cardEl.append(date).append(icon).append(temp).append(wind).append(hum); 
-        };         
-    };
+    $('#forecast').append(cardEl);
+    cardEl.append(date).append(icon).append(temp).append(wind).append(hum); 
 };
 
 // clear forecast section
@@ -98,7 +96,7 @@ function clearForecastEl() {
 };
 
 // button handlers
-cityNameSearch.on('submit', handleCitySearch);
+cityNameSearch.on('submit', getCityName);
 
 historyContainerEl.click(function(event) {
     var temp = $(event.target);
@@ -109,7 +107,8 @@ historyContainerEl.click(function(event) {
     showWeather(city);
 });
 
-function handleCitySearch(event) {
+// handle form to get city name
+function getCityName(event) {
     event.preventDefault();
     city = $('input[name="city"').val();
     showWeather(city);
