@@ -39,7 +39,7 @@ function showWeather(city) {
     var currentWeatherURL = 
         'https://api.openweathermap.org/data/2.5/weather?q=' 
         + city + '&units=metric&appid=' + APIKey;
-
+    
     // Connect to 5 days every 3 hours API
     var forecastURL = 
         'http://api.openweathermap.org/data/2.5/forecast?q=' 
