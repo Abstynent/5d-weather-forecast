@@ -50,8 +50,7 @@ function showWeather(city) {
             response.json().then(function (data) {
                 addCityToLocalStorage(city);
                 renderCurrentWeather(data);
-                clearForecastEl(); // clear div
-
+                $('#forecast').empty();
                 fetch(forecastURL).then(function(response) {
                     response.json().then(function(data) {
                         for(var i=0; i<40; i++) {
