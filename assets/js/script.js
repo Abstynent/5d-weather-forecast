@@ -109,7 +109,7 @@ historyContainerEl.click(function(event) {
 // handle form to get city name
 function getCityName(event) {
     event.preventDefault();
-    city = $('input[name="city"').val();
+    city = $('input[name="city"]').val();
     showWeather(city);
     cityNameSearch[0].reset(); // clear the value
 };
